@@ -13,7 +13,7 @@ class Mitudomoe
 
   setState : (newState)->
     controllers = @plugins
-      .map (p)-> p.getControllers? @currentState, newState
+      .map (p)=> p.getControllers? @currentState, newState
       .reduce ((l,t)-> l.concat t), [] #flatten array
       .filter (x)-> x isnt undefined
 
