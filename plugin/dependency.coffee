@@ -1,6 +1,8 @@
 BaseSyntax = require 'functional-parser/syntax/base'
 RegexSyntax = require 'functional-parser/syntax/regex'
 {Lexer} = require 'functional-parser/parser'
+{Parser} = require '../core/compiler'
+Mitudomoe = require '../core/mitudomoe'
 
 class DependencySyntax extends BaseSyntax
   openRegex : /#import\s*/
@@ -9,8 +11,8 @@ class DependencySyntax extends BaseSyntax
     super
     @context = null
     @subLexer = new Lexer
-    @subLexer.addSyntax = new RegexSyntax @openRegex, 'IMPORT_MARK'
-    @subLexer.addSyntax = new RegexSyntax @openRegex, 'IMPORT_FILE'
+    @subLexer.addSyntax new RegexSyntax @openRegex, -> 'IMPORT_MARK'
+    @subLexer.addSyntax new RegexSyntax @filenameRegex, -> 'IMPORT_FILE'
 
   lexingStep : (input)->
     @subLexer.setInput input
@@ -29,7 +31,7 @@ class DependencySyntax extends BaseSyntax
 
   grammar : (bnf)->
     STATE : [
-      @pattern 'IMPORTED_STATE', $1
+      @pattern 'IMPORTED_STATE', -> $1
     ]
 
     IMPORTED_STATE : [
@@ -40,9 +42,10 @@ class DependencySyntax extends BaseSyntax
     importFile : (filename)=>
       content = @context?.getContent filename
       lexer = @lexer
-      parser = new MitudomoeParser
+      parser = new Parser
       parser.addSyntax syntax for syntax in lexer.syntaxes
-      state = mergeStates parser.parse content
+      states = parser.parse content
+      state = Mitudomoe.mergeStates states
       syntax.lexer = lexer for syntax in lexer.syntaxes
       return state
 

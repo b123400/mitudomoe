@@ -1,4 +1,5 @@
 Q = require 'q'
+utility = require '../core/utility'
 
 class Mitudomoe
   constructor : ->
@@ -30,5 +31,8 @@ class Mitudomoe
     return if not @generator or @generator.ended
     Q(@generator.next()).then (s)=>
       @setState s
+
+  @mergeStates : (states)->
+    states.reduce utility.mergeState, {}
 
 module.exports = Mitudomoe

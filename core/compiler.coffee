@@ -43,8 +43,12 @@ class MitudomoeParser extends Parser
       catch e
         syntax = new DependencySyntax
         @lexer.syntaxes.splice index+1, 0, syntax
+        @addSyntax syntax
         return syntax
     catch e
       console.log 'Cannot find dependency syntax, ignored.', e
 
-module.exports = MitudomoeCompiler
+module.exports = {
+  Compiler : MitudomoeCompiler, 
+  Parser : MitudomoeParser
+}

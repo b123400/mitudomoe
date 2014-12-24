@@ -1,9 +1,17 @@
 utility =
+  
+  isString : (obj)-> obj instanceof String or typeof obj is "string"
+  isNumber : (obj)-> obj instanceof Number or typeof obj is "number"
+
+  unique : (array)-> array.filter (v,i,self)-> i is self.indexOf v
+
+  uniqueObjectKeys : (objs...)->
+    keys = []
+    keys.push.apply keys, Object.keys(obj) for obj in objs
+    @unique keys
+
   diffObject : (oldObject={}, newObject={}, {flat, ordered}={})=>
-    unique = (v,i,self)-> i is self.indexOf v
-    allKeys = Object.keys(oldObject)
-      .concat(Object.keys(newObject))
-      .filter unique
+    allKeys = @uniqueObjectKeys oldObject, newObject
 
     result = {}
     for key in allKeys
@@ -22,13 +30,13 @@ utility =
       else if (oldValue instanceof Object) and (newValue instanceof Object)
 
         if not ordered and (oldValue instanceof Array) and (newValue instanceof Array)
-          result[key] = utility.diffArray oldValue, newValue
+          result[key] = @diffArray oldValue, newValue
 
         else if flat
           result[key] = oldValue is newValue
 
         else
-          result[key] = utility.diffObject oldValue, newValue
+          result[key] = @diffObject oldValue, newValue
 
       else if oldValue isnt newValue
         result[key] = 'modified'
@@ -42,7 +50,30 @@ utility =
         removed : oldArray.filter (v)-> v not in newArray
       }
     else
-      utility.diffObject oldArray, newArray, {flat, ordered}
+      @diffObject oldArray, newArray, {flat, ordered}
+
+  mergeState : (base={}, delta={})->
+    result = {}
+    keys = @uniqueObjectKeys base, delta
+    for key in keys
+      if !(key of base)
+        # added
+        result[key] = delta[key]
+      else if !(key of delta)
+        # not exist in delta = inherit from base
+        result[key] = base[key]
+      else
+        # both exist
+        if delta[key] is null
+          # remove key explicitly
+          continue
+        if @isString delta[key] or @isNumber delta[key] or delta[key] instanceof Array
+          result[key] = delta[key]
+        else if (base[key] instanceof Object) and (delta[key] instanceof Object)
+          result[key] = @mergeState base[key], delta[key]
+        else
+          result[key] = delta[key] || base[key]
+    return result
 
   mixin : (dest, srcs...)=>
     for src in srcs
@@ -51,4 +82,5 @@ utility =
           throw "#{key} already exists, cannot mix"
         dest[key] = src[key]
 
-module.exports = utility
+for key, value of utility
+  exports[key] = utility[key].bind utility

@@ -38,6 +38,7 @@ class CharacterPlugin
 # @return identifiers of character
 ###
 diffCharacters = (oldState, newState)->
+  # TODO: handle createa and delete
   diff = utility.diffArray oldState.characters, newState.characters, flat:true
   diff.added
     .concat diff.removed
