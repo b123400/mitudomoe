@@ -1,4 +1,4 @@
-Compiler = require './core/compiler'
+{Compiler} = require './core/compiler'
 Context = require './core/context'
 configure = require './configure'
 Q = require 'q'
@@ -9,13 +9,10 @@ app = new Compiler
 configure app
 
 app.connectSyntaxes = (syntaxes)->
-  syntaxes.setting?.addDelegate syntaxes.character.applySetting()
+  {setting, character} = syntaxes
+  setting?.addDelegate character.applySetting()
 
-# Comment this line if you don't need to need importing function
-# import機能が入らなければこれをコメントアウトしてください
-app.injectDependencySyntax = true
 
-normalizedPath = Path.join __dirname, 'scenario'
 getScenarioFiles = (path)->
   files = fs.readdirSync normalizedPath # fix it later
   files.map (filename)-> Path.join __dirname, 'scenario', filename
@@ -23,7 +20,13 @@ getScenarioFiles = (path)->
 getOutputPath = (path)->
   return path.replace 'scenario', 'compiled' # fix it later
 
+normalizedPath = Path.join __dirname, 'scenario'
 files = getScenarioFiles normalizedPath
+
+
+# Comment this line if you don't need to need importing function
+# import機能が入らなければこれをコメントアウトしてください
+app.injectDependencySyntax = true
 
 # ここからimportするファイルを探す
 # Search for file to import from this context
@@ -34,9 +37,12 @@ context = new Context normalizedPath
 promises =
   for filename in files
     do (filename)->
+      compiled = null
       Q.denodeify(fs.readFile)(filename, encoding:'utf8')
-        .then (content)-> app.compile content, context
+        .then (content)-> compiled = app.compile content, context
         .then (states)-> Q.denodeify(fs.writeFile) getOutputPath(filename), JSON.stringify(states)
+        .then -> {filename, compiled}
 
-Q.all(promises).done ->
+Q.all(promises).done (result)->
+  console.log JSON.stringify result, null, '  '
   console.log 'Finished'

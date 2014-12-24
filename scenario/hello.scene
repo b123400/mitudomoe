@@ -1,10 +1,12 @@
+#import header.scene
+
 hello
 world
 
 alice : hello
+bob : yay!
 
 -- key : value --
-
 -- characters : alice --
 
 alice : hello world!
