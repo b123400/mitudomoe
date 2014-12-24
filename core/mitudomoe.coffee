@@ -12,7 +12,8 @@ class Mitudomoe
     @plugins.push plugin if plugin not in @plugins
 
   setState : (newState)->
-    controllers = (p.getControllers?(@currentState, newState) for p in @plugins)
+    controllers = @plugins
+      .map (p)-> p.getControllers? @currentState, newState
       .reduce ((l,t)-> l.concat t), [] #flatten array
       .filter (x)-> x isnt undefined
 

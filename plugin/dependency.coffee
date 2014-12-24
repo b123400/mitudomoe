@@ -11,6 +11,7 @@ class DependencySyntax extends BaseSyntax
     super
     @context = null
     @subLexer = new Lexer
+    @importStack = []
     @subLexer.addSyntax new RegexSyntax @openRegex, -> 'IMPORT_MARK'
     @subLexer.addSyntax new RegexSyntax @filenameRegex, -> 'IMPORT_FILE'
 
@@ -40,13 +41,24 @@ class DependencySyntax extends BaseSyntax
 
   bridge : ->
     importFile : (filename)=>
+
+      if filename in @importStack
+        circularText = @importStack.join(' --> ') + ' --> '+ filename
+        throw "Circular import is not supported #{circularText}"
+      @importStack.push filename
+
       content = @context?.getContent filename
       lexer = @lexer
       parser = new Parser
+      
       parser.addSyntax syntax for syntax in lexer.syntaxes
       states = parser.parse content
+
+      @importStack.pop()
+
       state = Mitudomoe.mergeStates states
       syntax.lexer = lexer for syntax in lexer.syntaxes
+
       return state
 
 module.exports = {

@@ -10,7 +10,7 @@ utility =
     keys.push.apply keys, Object.keys(obj) for obj in objs
     @unique keys
 
-  diffObject : (oldObject={}, newObject={}, {flat, ordered}={})=>
+  diffObject : (oldObject={}, newObject={}, {flat, ordered}={})->
     allKeys = @uniqueObjectKeys oldObject, newObject
 
     result = {}
@@ -42,7 +42,7 @@ utility =
         result[key] = 'modified'
     return result
 
-  diffArray : (oldArray=[], newArray=[], {flat, ordered}={})=>
+  diffArray : (oldArray=[], newArray=[], {flat, ordered}={})->
     result={}
     if not ordered
       {
@@ -75,7 +75,7 @@ utility =
           result[key] = delta[key] || base[key]
     return result
 
-  mixin : (dest, srcs...)=>
+  mixin : (dest, srcs...)->
     for src in srcs
       for key, value in src
         if dest[key]

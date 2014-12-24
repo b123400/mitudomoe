@@ -34,14 +34,15 @@ context = new Context normalizedPath
 
 
   
-promises =
-  for filename in files
-    do (filename)->
-      compiled = null
-      Q.denodeify(fs.readFile)(filename, encoding:'utf8')
-        .then (content)-> compiled = app.compile content, context
-        .then (states)-> Q.denodeify(fs.writeFile) getOutputPath(filename), JSON.stringify(states)
-        .then -> {filename, compiled}
+promises = files.map (filename)->
+  compiled = null
+  read = Q.denodeify(fs.readFile)
+  write = Q.denodeify(fs.writeFile)
+
+  read(filename, encoding:'utf8')
+    .then (content)-> compiled = app.compile content, context
+    .then (states)->  write getOutputPath(filename), JSON.stringify(states)
+    .then -> {filename, compiled}
 
 Q.all(promises).done (result)->
   console.log JSON.stringify result, null, '  '
