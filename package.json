@@ -1,0 +1,12 @@
+{
+  "name": "mitudomoe",
+  "version": "0.0.0",
+  "dependencies": {
+    "q": "*",
+    "functional-parser":"git://github.com/b123400/functional-parser.git"
+  },
+  "scripts" : {
+    "start" : "node app.js",
+    "compile" : "node compile.js"
+  }
+}
