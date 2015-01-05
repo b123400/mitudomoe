@@ -1,0 +1,11 @@
+{
+  "name": "mitudomoe-setting",
+  "version": "0.0.0",
+  "dependencies": {
+    "functional-parser": "file:/Users/b123400/Dropbox/webapp/functional-parser/"
+  },
+  "scripts": {
+    "prepublish": "coffee -bc *.coffee"
+  },
+  "devDependencies": {}
+}
