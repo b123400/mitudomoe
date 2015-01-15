@@ -5,7 +5,8 @@
   "dependencies": {
     "coffee-script": "~> 1.8",
     "functional-parser": "file:/Users/b123400/Dropbox/webapp/functional-parser/",
-    "q": "*"
+    "q": "*",
+    "fs-extra": "^0.14.0"
   },
   "devDependencies": {
     "async": "^0.9.0",
@@ -13,7 +14,7 @@
   },
   "scripts": {
     "prepublish": "npm run build",
-    "build": "./node_modules/coffee-script/bin/coffee build.coffee"
+    "build": "./node_modules/coffee-script/bin/coffee -c -o ./lib ./src"
   },
   "mitudomoeCompiler": [
     "lib/compiler.js"

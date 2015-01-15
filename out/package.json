@@ -1,0 +1,22 @@
+{
+  "name": "demo-project",
+  "version": "0.0.0",
+  "dependencies": {
+    "coffee-script": "~> 1.8",
+    "mitudomoe": "file:../mitudomoe",
+    "mitudomoe-dependency": "file:../plugin/dependency",
+    "mitudomoe-line": "file:../plugin/line",
+    "mitudomoe-character": "file:../plugin/character",
+    "mitudomoe-setting": "file:../plugin/setting"
+  },
+  "devDependencies": {
+    "browserify": "*",
+    "file": "^0.2.2",
+    "glob": "^4.3.2",
+    "q": "^1.1.2",
+    "yargs": "*"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}
