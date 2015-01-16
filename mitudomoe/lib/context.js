@@ -40,7 +40,7 @@
 
     Context.prototype.write = function(path, content) {
       var write;
-      write = Q.denodeify(fs.writeFile);
+      write = Q.denodeify(fsx.outputFile);
       return write(this.resolve(path), content);
     };
 

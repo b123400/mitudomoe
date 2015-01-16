@@ -19,7 +19,7 @@ class Context
     Q.denodeify(fs.stat)(path)
 
   write : (path, content)->
-    write = Q.denodeify fs.writeFile
+    write = Q.denodeify fsx.outputFile
     write @resolve(path), content
 
   copy : (inPath, outPath)->

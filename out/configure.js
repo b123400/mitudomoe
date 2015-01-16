@@ -4,8 +4,8 @@
   Context = require('mitudomoe').Context;
 
   module.exports = function(app) {
+    app.addPlugin('line');
     app.addPlugin('character');
-    app.addPlugin('dependency');
     return app.globalStorage = {};
   };
 

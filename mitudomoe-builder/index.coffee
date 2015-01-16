@@ -3,24 +3,29 @@ Q = require 'q'
 Path = require 'path'
 Coffee = require 'coffee-script'
 
-map = (fn)-> (items)-> Q.all(fn item for item in items)
+map = (fn)-> (items)-> Q.all (fn item for item in items)
 
 build = (options)->
   app = null
-  i = 0
   # Copy items
   getAllItemsInContext options.in
   .then map (item)->
-    processItem item, options
+    processSource item, options
   .then ->
     injectFramework options.out
   .then ->
     {Compiler} = require options.out.resolve 'node_modules', 'mitudomoe'
     # Boot compiler
     app = new Compiler
-    configure = require options.out.resolve('./configure')
+    configure = try require options.out.resolve('./configure')
+    throw "Cannot find 'configure.js' at the root of the project " if not configure
     configure app
-    app.preBuild options.out
+    app.preBuild options.in, options.out
+
+  .then ->
+    getAllItemsInContext options.in
+  .then map (item)->
+    processResource item, app, options
 
 getAllItemsInContext = (context)->
   # return all file names
@@ -54,7 +59,7 @@ getAllItemsInContext = (context)->
           context
         }
 
-processItem = (item, options)->
+processSource = (item, options)->
   inContext = options.in
   outContext = options.out
   relativePath = inContext.relative item.context.path
@@ -63,19 +68,42 @@ processItem = (item, options)->
     when 'node_modules'
       inContext.copy inContext.resolve(relativePath, item.name), outContext.resolve relativePath, item.name
     when 'folder'
-      Q.all(processItem item, options for item in item.items)
+      Q.all(processSource item, options for item in item.items)
     when 'file'
-      if Path.extname(item.name) is '.coffee'
-        item.context.getContent item.name
-        .then (content)->
-          compiled = Coffee.compile content
-          filename = Path.basename(item.name, '.coffee')+'.js'
-          outContext.write outContext.resolve(relativePath, filename), compiled
-      else
-        # copy only
-        inPath = inContext.resolve relativePath, item.name
-        outPath = outContext.resolve relativePath, item.name
-        inContext.copy inPath, outPath
+      switch Path.extname(item.name).toLowerCase()
+        when '.coffee'
+          item.context.getContent item.name
+          .then (content)->
+            compiled = Coffee.compile content
+            filename = Path.basename(item.name.toLowerCase(), '.coffee')+'.js'
+            outContext.write outContext.resolve(relativePath, filename), compiled
+        when '.js'
+          # copy only
+          inPath = inContext.resolve relativePath, item.name
+          outPath = outContext.resolve relativePath, item.name
+          inContext.copy inPath, outPath
+
+processResource = (item, app, options)->
+  if item.type is 'folder'
+    Q.all(processResource subItem, app, options for subItem in item.items)
+  else if Path.extname(item.name) is '.scene'
+    processSceneario item, app, options
+  else
+    relativePath = options.in.relative item.context.path
+    inPath = options.in.resolve relativePath, item.name
+    outPath = options.out.resolve relativePath, item.name
+    options.in.copy inPath, outPath # or symlink if ok
+
+processSceneario = (item, app, options)->
+  return null if Path.extname(item.name) isnt '.scene'
+  relativePath = options.in.relative item.context.path
+  inPath = options.in.resolve relativePath, item.name
+  outPath = options.out.resolve relativePath, item.name
+
+  options.in.getContent inPath
+  .then (content)->
+    compiled = app.compile content, item.context
+    options.out.write outPath, JSON.stringify compiled
 
 injectFramework = (targetContext)->
   frameworkPath = Path.resolve __dirname, 'node_modules', 'mitudomoe'

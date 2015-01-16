@@ -1,6 +1,8 @@
 Mitudomoe = require './core'
 {Parser} = require 'functional-parser/parser'
+{preBuild} = require './build'
 Path = require 'path'
+Q = require 'q'
 
 class MitudomoeCompiler extends Mitudomoe
   constructor : ->
@@ -33,14 +35,7 @@ class MitudomoeCompiler extends Mitudomoe
 
   injectDependencySyntax : false
 
-  preBuild : (context)->
-    relative = (p)-> Path.relative context.path, p
-    path = Path.resolve __dirname, 'plugins.js'
-    content = "module.exports={"
-    content += ("require('#{relative p}')" for p in @pluginFolders).join ','
-    content += "};"
-    console.log 'writing ', content, 'to', path
-    context.write path, content
+  preBuild : -> preBuild @
 
 class MitudomoeParser extends Parser
   injectDependencySyntax : (getPlugin)->

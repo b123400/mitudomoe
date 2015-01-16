@@ -4,7 +4,7 @@
   "main": "index.js",
   "dependencies": {
     "functional-parser": "file:/Users/b123400/Dropbox/webapp/functional-parser/",
-    "mitudomoe": "../mitudomoe"
+    "mitudomoe": "../../mitudomoe"
   },
   "devDependencies": {},
   "scripts": {
